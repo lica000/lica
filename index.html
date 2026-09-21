@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>各種座標圖</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: sans-serif;
+  background: #f7f7f7;
+  color: #333;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+section {
+  background: white;
+  padding: 18px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+button {
+  padding: 7px 12px;
+  margin: 3px;
+  border: 1px solid #bbb;
+  border-radius: 7px;
+  background: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #eee;
+}
+
+input, select, textarea {
+  padding: 7px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 7px;
+  text-align: center;
+}
+
+th {
+  background: #f0f0f0;
+}
+
+.axis-row,
+.character-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.axis-row input {
+  width: 110px;
+}
+
+.character-row input[type="text"] {
+  width: 130px;
+}
+
+.chart-selectors {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.chart {
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  aspect-ratio: 1 / 1;
+  margin: 35px auto 45px;
+
+  /* 已移除外框 */
+
+  background:
+    linear-gradient(to right, transparent 49.8%, #ddd 50%, transparent 50.2%),
+    linear-gradient(to bottom, transparent 49.8%, #ddd 50%, transparent 50.2%);
+}
+
+.axis-label {
+  position: absolute;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.axis-left {
+  left: 0;
+  top: 50%;
+  transform: translate(-105%, -50%);
+}
+
+.axis-right {
+  right: 0;
+  top: 50%;
+  transform: translate(105%, -50%);
+}
+
+.axis-top {
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -125%);
+}
+
+.axis-bottom {
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 125%);
+}
+
+.point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.point-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  margin: 0 auto 2px;
+  border: 2px solid rgba(0,0,0,0.25);
+}
+
+.small-note {
+  color: #777;
+  font-size: 13px;
+}
+
+.import-example {
+  background: #f3f3f3;
+  padding: 10px;
+  border-radius: 7px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+
+/* ==================== 自訂色票 ==================== */
+
+.color-picker-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.color-button {
+  width: 38px;
+  height: 32px;
+  padding: 3px;
+  margin: 3px;
+  border-radius: 7px;
+  border: 1px solid #aaa;
+  cursor: pointer;
+}
+
+.color-button-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.color-palette {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  top: 42px;
+  left: 0;
+  width: 230px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.18);
+}
+
+.color-palette.show {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.12);
+  cursor: pointer;
+}
+
+.color-swatch:hover {
+  transform: scale(1.12);
+}
+
+.custom-color-button {
+  width: 100%;
+  margin: 7px 0 0;
+  font-size: 13px;
+}
+
+.hidden-color-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>各種座標圖</h1>
+
+
+<!-- ==================== 座標圖 ==================== -->
+
+<section>
+  <h2>座標圖</h2>
+
+  <div class="chart-selectors">
+    <label>
+      X 軸：
+      <select id="xAxisSelect"></select>
+    </label>
+
+    <label>
+      Y 軸：
+      <select id="yAxisSelect"></select>
+    </label>
+  </div>
+
+  <div class="chart" id="chart">
+    <div class="axis-label axis-left" id="leftLabel"></div>
+    <div class="axis-label axis-right" id="rightLabel"></div>
+    <div class="axis-label axis-top" id="topLabel"></div>
+    <div class="axis-label axis-bottom" id="bottomLabel"></div>
+  </div>
+</section>
+
+
+<!-- ==================== 快速輸入 ==================== -->
+
+<section>
+  <h2>快速輸入數值</h2>
+
+  <p class="small-note">
+    0～100。左／上為 100，右／下為 0。
+  </p>
+
+  <div id="quickTable"></div>
+</section>
+
+
+<!-- ==================== 軸管理 ==================== -->
+
+<section>
+  <h2>座標軸</h2>
+
+  <div id="axisList"></div>
+
+  <div class="axis-row">
+    <input id="newAxisLeft" placeholder="左／上，例如：光">
+    <span>/</span>
+    <input id="newAxisRight" placeholder="右／下，例如：暗">
+    <button onclick="addAxis()">新增座標軸</button>
+  </div>
+</section>
+
+
+<!-- ==================== 角色管理 ==================== -->
+
+<section>
+  <h2>角色</h2>
+
+  <div id="characterList"></div>
+
+  <div class="character-row">
+    <input id="newCharacterName" type="text" placeholder="角色名稱">
+
+    <div class="color-picker-wrap">
+      <button
+        type="button"
+        class="color-button"
+        id="newColorButton"
+        onclick="toggleNewColorPalette()"
+      >
+        <div class="color-button-inner" id="newColorPreview"></div>
+      </button>
+
+      <div class="color-palette" id="newColorPalette"></div>
+
+      <input
+        type="color"
+        id="newNativeColor"
+        class="hidden-color-input"
+      >
+    </div>
+
+    <button onclick="addCharacter()">新增角色</button>
+  </div>
+</section>
+
+
+<!-- ==================== 匯入 ==================== -->
+
+<section>
+  <h2>文字匯入</h2>
+
+  <p class="small-note">
+    第一列是欄位名稱，第一欄是角色名稱，後面依序填各座標軸的 0～100 數值。
+    欄位之間用空格分隔。
+  </p>
+
+  <div class="import-example">id="h0wfgc"
+角色 光/暗 理性/感性 主動/被動
+阿明 80 30 70
+小紅 20 85 40
+小藍 55 60 25</div>
+
+  <br>
+
+  <textarea id="importText" placeholder="把文字貼到這裡"></textarea>
+
+  <br>
+
+  <button onclick="importTextData()">匯入文字</button>
+</section>
+
+
+<!-- ==================== 匯出 ==================== -->
+
+<section>
+  <h2>文字匯出</h2>
+
+  <p class="small-note">
+    會產生可以再次匯入的文字格式。
+  </p>
+
+  <button onclick="generateExport()">產生匯出文字</button>
+  <button onclick="copyExport()">複製匯出文字</button>
+
+  <br><br>
+
+  <textarea id="exportText" readonly></textarea>
+</section>
+
+
+<script>
+
+// ============================================================
+// 資料
+// ============================================================
+
+let axes = JSON.parse(localStorage.getItem("ocAxes") || "[]");
+let characters = JSON.parse(localStorage.getItem("ocCharacters") || "[]");
+
+
+// ============================================================
+// 好看的隨機顏色
+// ============================================================
+
+function randomNiceColor() {
+
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = 42 + Math.floor(Math.random() * 20);
+  const lightness = 68 + Math.floor(Math.random() * 10);
+
+  return hslToHex(hue, saturation, lightness);
+}
+
+
+function hslToHex(h, s, l) {
+
+  s /= 100;
+  l /= 100;
+
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+
+  const f = n =>
+    l - a * Math.max(
+      -1,
+      Math.min(
+        k(n) - 3,
+        Math.min(9 - k(n), 1)
+      )
+    );
+
+  return "#" +
+    [f(0), f(8), f(4)]
+      .map(x =>
+        Math.round(255 * x)
+          .toString(16)
+          .padStart(2, "0")
+      )
+      .join("");
+}
+
+
+// ============================================================
+// 推薦色票
+// ============================================================
+
+const colorPalette = [
+  "#F29A9A",
+  "#F0B07A",
+  "#DFC16D",
+  "#B8D58F",
+  "#82C4A5",
+  "#7FC5C0",
+  "#86B9DE",
+  "#9DAEE0",
+  "#B49DDA",
+  "#D19BC9",
+  "#DE9EAE",
+  "#C6AE94",
+
+  "#E97878",
+  "#E9945F",
+  "#D7B548",
+  "#9FC66F",
+  "#68B58F",
+  "#61B2AD",
+  "#6FA6D0",
+  "#8599D0",
+  "#9A83C7",
+  "#C486B7",
+  "#CD8298",
+  "#AC967A"
+];
+
+
+// ============================================================
+// ID
+// ============================================================
+
+function makeId() {
+  return Math.random().toString(36).substring(2, 8);
+}
+
+
+// ============================================================
+// 儲存
+// ============================================================
+
+function saveData() {
+  localStorage.setItem("ocAxes", JSON.stringify(axes));
+  localStorage.setItem("ocCharacters", JSON.stringify(characters));
+}
+
+
+// ============================================================
+// 建立色票
+// ============================================================
+
+function createPalette(container, getColor, setColor) {
+
+  container.innerHTML = "";
+
+  colorPalette.forEach(function(color) {
+
+    const swatch = document.createElement("button");
+
+    swatch.type = "button";
+    swatch.className = "color-swatch";
+    swatch.style.backgroundColor = color;
+    swatch.title = color;
+
+    swatch.onclick = function() {
+      setColor(color);
+      container.classList.remove("show");
+    };
+
+    container.appendChild(swatch);
+  });
+
+  const customButton = document.createElement("button");
+
+  customButton.type = "button";
+  customButton.className = "custom-color-button";
+  customButton.textContent = "自訂顏色…";
+
+  customButton.onclick = function() {
+
+    const input = document.createElement("input");
+
+    input.type = "color";
+    input.value = getColor();
+
+    input.onchange = function() {
+      setColor(input.value);
+    };
+
+    input.click();
+  };
+
+  container.appendChild(customButton);
+}
+
+
+// ============================================================
+// 新增角色的顏色
+// ============================================================
+
+let newCharacterColor = randomNiceColor();
+
+
+function updateNewColorPreview() {
+
+  document.getElementById("newColorPreview").style.backgroundColor =
+    newCharacterColor;
+}
+
+
+function toggleNewColorPalette() {
+
+  const palette =
+    document.getElementById("newColorPalette");
+
+  document.querySelectorAll(".color-palette").forEach(function(item) {
+
+    if (item !== palette) {
+      item.classList.remove("show");
+    }
+
+  });
+
+  palette.classList.toggle("show");
+}
+
+
+function setupNewColorPicker() {
+
+  const palette =
+    document.getElementById("newColorPalette");
+
+  createPalette(
+    palette,
+    function() {
+      return newCharacterColor;
+    },
+    function(color) {
+      newCharacterColor = color;
+      updateNewColorPreview();
+    }
+  );
+
+  updateNewColorPreview();
+}
+
+
+// ============================================================
+// 座標軸
+// ============================================================
+
+function addAxis() {
+
+  const left =
+    document.getElementById("newAxisLeft").value.trim();
+
+  const right =
+    document.getElementById("newAxisRight").value.trim();
+
+  if (!left || !right) return;
+
+  const newAxis = {
+    id: makeId(),
+    left: left,
+    right: right
+  };
+
+  axes.push(newAxis);
+
+  characters.forEach(function(character) {
+    character.values[newAxis.id] = 50;
+  });
+
+  document.getElementById("newAxisLeft").value = "";
+  document.getElementById("newAxisRight").value = "";
+
+  saveData();
+  renderAll();
+}
+
+
+function deleteAxis(id) {
+
+  axes = axes.filter(function(axis) {
+    return axis.id !== id;
+  });
+
+  characters.forEach(function(character) {
+    delete character.values[id];
+  });
+
+  saveData();
+  renderAll();
+}
+
+
+function editAxis(id) {
+
+  const axis = axes.find(function(axis) {
+    return axis.id === id;
+  });
+
+  if (!axis) return;
+
+  const left = prompt("左／上端點名稱", axis.left);
+
+  if (left === null) return;
+
+  const right = prompt("右／下端點名稱", axis.right);
+
+  if (right === null) return;
+
+  axis.left = left.trim();
+  axis.right = right.trim();
+
+  saveData();
+  renderAll();
+}
+
+
+function renderAxes() {
+
+  const box = document.getElementById("axisList");
+
+  box.innerHTML = "";
+
+  axes.forEach(function(axis) {
+
+    const row = document.createElement("div");
+    row.className = "axis-row";
+
+    const text = document.createElement("span");
+
+    text.textContent =
+      axis.left + " / " + axis.right;
+
+    const edit = document.createElement("button");
+
+    edit.textContent = "編輯";
+
+    edit.onclick = function() {
+      editAxis(axis.id);
+    };
+
+    const del = document.createElement("button");
+
+    del.textContent = "刪除";
+
+    del.onclick = function() {
+      deleteAxis(axis.id);
+    };
+
+    row.appendChild(text);
+    row.appendChild(edit);
+    row.appendChild(del);
+
+    box.appendChild(row);
+  });
+}
+
+
+// ============================================================
+// 角色
+// ============================================================
+
+function addCharacter() {
+
+  const name =
+    document.getElementById("newCharacterName").value.trim();
+
+  if (!name) return;
+
+  const values = {};
+
+  axes.forEach(function(axis) {
+    values[axis.id] = 50;
+  });
+
+  characters.push({
+    id: makeId(),
+    name: name,
+    color: newCharacterColor,
+    values: values
+  });
+
+  document.getElementById("newCharacterName").value = "";
+
+  newCharacterColor = randomNiceColor();
+
+  updateNewColorPreview();
+
+  saveData();
+  renderAll();
+}
+
+
+function deleteCharacter(id) {
+
+  characters = characters.filter(function(character) {
+    return character.id !== id;
+  });
+
+  saveData();
+  renderAll();
+}
+
+
+function editCharacter(id) {
+
+  const character =
+    characters.find(function(character) {
+      return character.id === id;
+    });
+
+  if (!character) return;
+
+  const name =
+    prompt("角色名稱", character.name);
+
+  if (name === null) return;
+
+  const newName = name.trim();
+
+  if (!newName) return;
+
+  character.name = newName;
+
+  saveData();
+  renderAll();
+}
+
+
+function changeCharacterColor(id, color) {
+
+  const character =
+    characters.find(function(character) {
+      return character.id === id;
+    });
+
+  if (!character) return;
+
+  character.color = color;
+
+  saveData();
+  renderAll();
+}
+
+
+function toggleCharacterPalette(id) {
+
+  const palette =
+    document.getElementById("palette-" + id);
+
+  document.querySelectorAll(".color-palette").forEach(function(item) {
+
+    if (item !== palette) {
+      item.classList.remove("show");
+    }
+
+  });
+
+  palette.classList.toggle("show");
+}
+
+
+function renderCharacters() {
+
+  const box =
+    document.getElementById("characterList");
+
+  box.innerHTML = "";
+
+  characters.forEach(function(character) {
+
+    const row =
+      document.createElement("div");
+
+    row.className = "character-row";
+
+
+    const name =
+      document.createElement("span");
+
+    name.textContent = character.name;
+
+
+    // 顏色選擇器
+
+    const colorWrap =
+      document.createElement("div");
+
+    colorWrap.className = "color-picker-wrap";
+
+
+    const colorButton =
+      document.createElement("button");
+
+    colorButton.type = "button";
+    colorButton.className = "color-button";
+
+
+    const colorPreview =
+      document.createElement("div");
+
+    colorPreview.className =
+      "color-button-inner";
+
+    colorPreview.style.backgroundColor =
+      character.color || randomNiceColor();
+
+    colorButton.appendChild(colorPreview);
+
+
+    const palette =
+      document.createElement("div");
+
+    palette.className = "color-palette";
+    palette.id = "palette-" + character.id;
+
+
+    colorButton.onclick = function() {
+      toggleCharacterPalette(character.id);
+    };
+
+
+    createPalette(
+      palette,
+      function() {
+        return character.color;
+      },
+      function(color) {
+        changeCharacterColor(character.id, color);
+      }
+    );
+
+
+    colorWrap.appendChild(colorButton);
+    colorWrap.appendChild(palette);
+
+
+    // 編輯
+
+    const edit =
+      document.createElement("button");
+
+    edit.textContent = "編輯";
+
+    edit.onclick = function() {
+      editCharacter(character.id);
+    };
+
+
+    // 刪除
+
+    const del =
+      document.createElement("button");
+
+    del.textContent = "刪除";
+
+    del.onclick = function() {
+      deleteCharacter(character.id);
+    };
+
+
+    row.appendChild(name);
+    row.appendChild(colorWrap);
+    row.appendChild(edit);
+    row.appendChild(del);
+
+    box.appendChild(row);
+  });
+}
+
+
+// ============================================================
+// X / Y 選擇
+// ============================================================
+
+function renderAxisSelectors() {
+
+  const xSelect =
+    document.getElementById("xAxisSelect");
+
+  const ySelect =
+    document.getElementById("yAxisSelect");
+
+  const oldX = xSelect.value;
+  const oldY = ySelect.value;
+
+  xSelect.innerHTML = "";
+  ySelect.innerHTML = "";
+
+  axes.forEach(function(axis) {
+
+    const optionX =
+      document.createElement("option");
+
+    optionX.value = axis.id;
+
+    optionX.textContent =
+      axis.left + " / " + axis.right;
+
+    xSelect.appendChild(optionX);
+
+
+    const optionY =
+      document.createElement("option");
+
+    optionY.value = axis.id;
+
+    optionY.textContent =
+      axis.left + " / " + axis.right;
+
+    ySelect.appendChild(optionY);
+  });
+
+  if (axes.length === 0) {
+    return;
+  }
+
+  if (axes.some(a => a.id === oldX)) {
+    xSelect.value = oldX;
+  }
+
+  if (axes.some(a => a.id === oldY)) {
+    ySelect.value = oldY;
+  }
+
+  if (!xSelect.value) {
+    xSelect.value = axes[0].id;
+  }
+
+  if (!ySelect.value) {
+    ySelect.value =
+      axes.length > 1
+        ? axes[1].id
+        : axes[0].id;
+  }
+
+  xSelect.onchange = renderChart;
+  ySelect.onchange = renderChart;
+}
+
+
+// ============================================================
+// 座標圖
+// ============================================================
+
+function renderChart() {
+
+  const chart =
+    document.getElementById("chart");
+
+  chart.querySelectorAll(".point").forEach(function(point) {
+    point.remove();
+  });
+
+  if (axes.length === 0) {
+
+    document.getElementById("leftLabel").textContent = "";
+    document.getElementById("rightLabel").textContent = "";
+    document.getElementById("topLabel").textContent = "";
+    document.getElementById("bottomLabel").textContent = "";
+
+    return;
+  }
+
+  const xId =
+    document.getElementById("xAxisSelect").value;
+
+  const yId =
+    document.getElementById("yAxisSelect").value;
+
+  const xAxis =
+    axes.find(function(axis) {
+      return axis.id === xId;
+    });
+
+  const yAxis =
+    axes.find(function(axis) {
+      return axis.id === yId;
+    });
+
+  if (!xAxis || !yAxis) return;
+
+
+  document.getElementById("leftLabel").textContent =
+    xAxis.left + " 100";
+
+  document.getElementById("rightLabel").textContent =
+    "0 " + xAxis.right;
+
+  document.getElementById("topLabel").textContent =
+    yAxis.left + " 100";
+
+  document.getElementById("bottomLabel").textContent =
+    "0 " + yAxis.right;
+
+
+  characters.forEach(function(character) {
+
+    const x =
+      Number(character.values[xId] ?? 50);
+
+    const y =
+      Number(character.values[yId] ?? 50);
+
+
+    const point =
+      document.createElement("div");
+
+    point.className = "point";
+
+    point.style.left =
+      (100 - x) + "%";
+
+    point.style.top =
+      (100 - y) + "%";
+
+
+    const dot =
+      document.createElement("div");
+
+    dot.className = "point-dot";
+
+    dot.style.background =
+      character.color || randomNiceColor();
+
+
+    const name =
+      document.createElement("div");
+
+    name.textContent =
+      character.name;
+
+    name.style.color =
+      character.color || "#555";
+
+
+    point.appendChild(dot);
+    point.appendChild(name);
+
+    chart.appendChild(point);
+  });
+}
+
+
+// ============================================================
+// 快速輸入表
+// ============================================================
+
+function renderQuickTable() {
+
+  const box =
+    document.getElementById("quickTable");
+
+  if (characters.length === 0 || axes.length === 0) {
+
+    box.innerHTML =
+      '<p class="small-note">新增角色和座標軸後，這裡會出現快速輸入表。</p>';
+
+    return;
+  }
+
+
+  const table =
+    document.createElement("table");
+
+
+  const header =
+    document.createElement("tr");
+
+
+  const nameHeader =
+    document.createElement("th");
+
+  nameHeader.textContent = "角色";
+
+  header.appendChild(nameHeader);
+
+
+  axes.forEach(function(axis) {
+
+    const th =
+      document.createElement("th");
+
+    th.textContent =
+      axis.left + " / " + axis.right;
+
+    header.appendChild(th);
+  });
+
+
+  table.appendChild(header);
+
+
+  characters.forEach(function(character) {
+
+    const tr =
+      document.createElement("tr");
+
+
+    const nameTd =
+      document.createElement("td");
+
+    nameTd.textContent =
+      character.name;
+
+    nameTd.style.color =
+      character.color;
+
+    tr.appendChild(nameTd);
+
+
+    axes.forEach(function(axis) {
+
+      const td =
+        document.createElement("td");
+
+
+      const input =
+        document.createElement("input");
+
+      input.type = "number";
+      input.min = 0;
+      input.max = 100;
+
+      input.value =
+        character.values[axis.id] ?? 50;
+
+      input.style.width = "75px";
+
+
+      input.oninput = function() {
+
+        let value =
+          Number(input.value);
+
+        if (value < 0) value = 0;
+        if (value > 100) value = 100;
+
+        character.values[axis.id] =
+          value;
+
+        saveData();
+        renderChart();
+      };
+
+
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+
+
+    table.appendChild(tr);
+  });
+
+
+  box.innerHTML = "";
+  box.appendChild(table);
+}
+
+
+// ============================================================
+// 匯入文字
+// ============================================================
+
+function importTextData() {
+
+  const text =
+    document.getElementById("importText").value.trim();
+
+  if (!text) return;
+
+
+  const lines =
+    text.split(/\r?\n/)
+      .map(function(line) {
+        return line.trim();
+      })
+      .filter(function(line) {
+        return line !== "";
+      });
+
+
+  if (lines.length < 2) return;
+
+
+  let startIndex = 0;
+
+
+  if (lines[0].startsWith("id=")) {
+    startIndex = 1;
+  }
+
+
+  const rows =
+    lines.slice(startIndex).map(function(line) {
+      return line.trim().split(/\s+/);
+    });
+
+
+  if (rows.length < 2) return;
+
+
+  const headers = rows[0];
+
+  if (headers.length < 2) return;
+
+
+  const axisHeaders =
+    headers.slice(1);
+
+
+  axisHeaders.forEach(function(header) {
+
+    const parts =
+      header.split("/");
+
+    if (parts.length !== 2) return;
+
+
+    const left = parts[0];
+    const right = parts[1];
+
+
+    const exists =
+      axes.some(function(axis) {
+        return axis.left === left &&
+               axis.right === right;
+      });
+
+
+    if (!exists) {
+
+      axes.push({
+        id: makeId(),
+        left: left,
+        right: right
+      });
+    }
+  });
+
+
+  rows.slice(1).forEach(function(row) {
+
+    if (row.length < 1) return;
+
+
+    const name = row[0];
+
+    if (!name) return;
+
+
+    let character =
+      characters.find(function(c) {
+        return c.name === name;
+      });
+
+
+    if (!character) {
+
+      character = {
+        id: makeId(),
+        name: name,
+        color: randomNiceColor(),
+        values: {}
+      };
+
+      characters.push(character);
+    }
+
+
+    axisHeaders.forEach(function(header, index) {
+
+      const parts =
+        header.split("/");
+
+      if (parts.length !== 2) return;
+
+
+      const left = parts[0];
+      const right = parts[1];
+
+
+      const axis =
+        axes.find(function(axis) {
+          return axis.left === left &&
+                 axis.right === right;
+        });
+
+
+      if (!axis) return;
+
+
+      let value =
+        Number(row[index + 1]);
+
+
+      if (isNaN(value)) {
+        value = 50;
+      }
+
+
+      value =
+        Math.max(0, Math.min(100, value));
+
+
+      character.values[axis.id] =
+        value;
+    });
+
+
+    axes.forEach(function(axis) {
+
+      if (
+        character.values[axis.id] === undefined
+      ) {
+        character.values[axis.id] = 50;
+      }
+
+    });
+
+  });
+
+
+  saveData();
+  renderAll();
+}
+
+
+// ============================================================
+// 匯出文字
+// ============================================================
+
+function generateExport() {
+
+  const rows = [];
+
+  rows.push('id="h0wfgc"');
+
+
+  const headers = ["角色"];
+
+
+  axes.forEach(function(axis) {
+
+    headers.push(
+      axis.left + "/" + axis.right
+    );
+
+  });
+
+
+  rows.push(headers.join(" "));
+
+
+  characters.forEach(function(character) {
+
+    const row =
+      [character.name];
+
+
+    axes.forEach(function(axis) {
+
+      row.push(
+        character.values[axis.id] ?? 50
+      );
+
+    });
+
+
+    rows.push(row.join(" "));
+  });
+
+
+  document.getElementById("exportText").value =
+    rows.join("\n");
+}
+
+
+// ============================================================
+// 複製匯出文字
+// ============================================================
+
+function copyExport() {
+
+  const textarea =
+    document.getElementById("exportText");
+
+
+  if (!textarea.value) {
+    generateExport();
+  }
+
+
+  textarea.select();
+
+
+  try {
+    document.execCommand("copy");
+  } catch (e) {
+    // 保留選取狀態
+  }
+}
+
+
+// ============================================================
+// 全部重新整理
+// ============================================================
+
+function renderAll() {
+
+  renderAxes();
+  renderCharacters();
+  renderAxisSelectors();
+  renderQuickTable();
+  renderChart();
+
+}
+
+
+// ============================================================
+// 啟動
+// ============================================================
+
+setupNewColorPicker();
+renderAll();
+
+
+// 點其他地方時關閉色票
+
+document.addEventListener("click", function(event) {
+
+  if (
+    !event.target.closest(".color-picker-wrap")
+  ) {
+
+    document
+      .querySelectorAll(".color-palette")
+      .forEach(function(palette) {
+        palette.classList.remove("show");
+      });
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>
