@@ -1,0 +1,3692 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>各種座標圖</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #f5f5f5;
+  color: #333;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Noto Sans TC",
+    "Microsoft JhengHei",
+    sans-serif;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.help {
+  line-height: 1.7;
+  color: #555;
+}
+
+/* ============================================================
+   座標圖
+============================================================ */
+
+.chart-area {
+  width: min(1000px, 100%);
+  margin: 25px auto 30px;
+}
+
+/*
+  圖表本身就是最大的正方形。
+  外圍只留一點空間給軸名稱，
+  不再把圖表縮成中間的小正方形。
+*/
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.chart {
+  position: absolute;
+
+  left: 6%;
+  right: 6%;
+  top: 6%;
+  bottom: 6%;
+
+  border: 2px solid #555;
+
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(0,0,0,0.10) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.10) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to right,
+      rgba(0,0,0,0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.035) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    10% 10%,
+    10% 10%,
+    5% 5%,
+    5% 5%;
+
+  background-color: #fff;
+}
+
+.chart::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: rgba(0,0,0,0.22);
+}
+
+.chart::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(0,0,0,0.22);
+}
+
+/* 軸名稱 */
+
+.axis-label {
+  position: absolute;
+
+  font-weight: bold;
+  font-size: 14px;
+
+  white-space: nowrap;
+
+  z-index: 10;
+
+  background: #fff;
+
+  padding: 2px 5px;
+
+  border-radius: 4px;
+}
+
+.axis-top {
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.axis-bottom {
+  bottom: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.axis-left {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: right;
+}
+
+.axis-right {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: left;
+}
+
+/* ============================================================
+   點
+============================================================ */
+
+.character-dot {
+  position: absolute;
+
+  width: 14px;
+  height: 14px;
+
+  border-radius: 50%;
+
+  border: 2px solid white;
+
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.35);
+
+  transform:
+    translate(-50%, -50%);
+
+  z-index: 3;
+}
+
+
+/* ============================================================
+   名稱
+============================================================ */
+
+/*
+  一般情況：
+  名稱固定在自己的點下面。
+
+  只有「座標完全相同」的角色，
+  才會往左右錯開。
+
+  不會因為附近有別的角色就避開。
+*/
+
+.character-name {
+  position: absolute;
+
+  white-space: nowrap;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  z-index: 4;
+
+  background:
+    rgba(255,255,255,0.88);
+
+  padding:
+    1px 4px;
+
+  border-radius: 4px;
+
+  pointer-events: none;
+
+  transform:
+    translate(-50%, 0);
+}
+
+
+/* ============================================================
+   軸選擇
+============================================================ */
+
+.axis-selects {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 15px;
+}
+
+.axis-selects select {
+  width: 100%;
+
+  padding: 9px;
+
+  border:
+    1px solid #ccc;
+
+  border-radius: 8px;
+
+  font-size: 15px;
+}
+
+
+/* ============================================================
+   按鈕
+============================================================ */
+
+button {
+  border: 0;
+
+  border-radius: 8px;
+
+  padding:
+    7px 12px;
+
+  cursor: pointer;
+
+  background: #e8e8e8;
+}
+
+button:hover {
+  filter: brightness(0.96);
+}
+
+.primary {
+  background: #333;
+  color: white;
+}
+
+.danger {
+  background: #e57373;
+  color: white;
+}
+
+.small-btn {
+  padding:
+    4px 7px;
+
+  font-size: 12px;
+}
+
+.reverse-btn {
+  background: #e0e0e0;
+}
+
+
+/* ============================================================
+   標籤
+============================================================ */
+
+.tag-filter {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 10px;
+}
+
+.tag-button {
+  background: #eee;
+
+  border-radius: 999px;
+}
+
+.tag-button.selected {
+  background: #555;
+
+  color: white;
+}
+
+.filter-mode {
+  margin-top: 10px;
+}
+
+.filter-mode label {
+  margin-right: 12px;
+}
+
+
+/* ============================================================
+   表格
+============================================================ */
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.character-table {
+  width: 100%;
+
+  border-collapse:
+    collapse;
+
+  min-width: 700px;
+}
+
+.character-table th,
+.character-table td {
+  border:
+    1px solid #ddd;
+
+  padding: 7px;
+
+  text-align: center;
+}
+
+.character-table th {
+  background: #f0f0f0;
+
+  white-space: nowrap;
+}
+
+.character-table input[type="text"],
+.character-table input[type="number"] {
+  width: 100%;
+
+  min-width: 70px;
+
+  padding: 6px;
+
+  border:
+    1px solid #ccc;
+
+  border-radius: 6px;
+}
+
+.name-input {
+  min-width: 100px !important;
+}
+
+.tags-input {
+  min-width: 130px !important;
+}
+
+
+/* ============================================================
+   顏色
+============================================================ */
+
+/*
+  不再讓 color-picker 依賴 overflow 容器。
+  它會固定在按鈕附近。
+
+  左邊角色的顏色選單往右展開，
+  因此不會被表格左邊切掉。
+*/
+
+.color-cell {
+  position: relative;
+}
+
+.color-button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  border-radius: 50%;
+
+  border:
+    2px solid #ccc;
+}
+
+.color-picker {
+  position: fixed;
+
+  z-index: 9999;
+
+  background: white;
+
+  border:
+    1px solid #ccc;
+
+  border-radius: 10px;
+
+  padding: 8px;
+
+  box-shadow:
+    0 4px 15px rgba(0,0,0,0.15);
+
+  display: none;
+
+  grid-template-columns:
+    repeat(6, 30px);
+
+  gap: 6px;
+
+  width: max-content;
+}
+
+.color-picker.open {
+  display: grid;
+}
+
+.color-option {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid #ddd;
+
+  padding: 0;
+
+  cursor: pointer;
+}
+
+.custom-color-label {
+  grid-column:
+    1 / -1;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  height: 32px;
+
+  border-radius: 6px;
+
+  background: #f0f0f0;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.custom-color-input {
+  position: absolute;
+
+  opacity: 0;
+
+  width: 1px;
+  height: 1px;
+}
+
+.hidden-row {
+  opacity: 0.45;
+}
+
+
+/* ============================================================
+   軸管理
+============================================================ */
+
+.axis-row {
+  display: grid;
+
+  grid-template-columns:
+    1fr auto auto auto;
+
+  gap: 8px;
+
+  align-items: center;
+
+  padding: 8px 0;
+
+  border-bottom:
+    1px solid #eee;
+}
+
+.axis-info {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.axis-name {
+  font-weight: bold;
+}
+
+.axis-description {
+  color: #777;
+
+  font-size: 13px;
+}
+
+
+/* ============================================================
+   匯入匯出
+============================================================ */
+
+textarea {
+  width: 100%;
+
+  min-height: 180px;
+
+  padding: 10px;
+
+  border:
+    1px solid #ccc;
+
+  border-radius: 8px;
+
+  resize: vertical;
+
+  font-family: monospace;
+
+  line-height: 1.6;
+}
+
+.import-help {
+  color: #666;
+
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   手機
+============================================================ */
+
+@media (max-width: 700px) {
+
+  body {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .axis-selects {
+    grid-template-columns:
+      1fr;
+  }
+
+  /*
+    手機仍然維持正方形。
+  */
+
+  .chart-wrapper {
+    aspect-ratio: 1 / 1;
+  }
+
+.chart {
+  left: 8%;
+  right: 8%;
+  top: 8%;
+  bottom: 8%;
+}
+
+.axis-label {
+  position: absolute;
+
+  font-weight: bold;
+  font-size: 14px;
+
+  white-space: nowrap;
+
+  z-index: 1;
+
+  background: transparent;
+
+  padding: 2px 5px;
+
+  border-radius: 4px;
+
+  pointer-events: none;
+}
+
+.character-name {
+  position: absolute;
+
+  white-space: nowrap;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  z-index: 5;
+
+  background: rgba(255,255,255,0.6);
+
+  padding: 1px 4px;
+
+  border-radius: 4px;
+
+  pointer-events: none;
+
+  transform: translate(-50%, 0);
+}
+
+  .axis-row {
+    grid-template-columns:
+      1fr auto auto auto;
+
+    gap: 5px;
+  }
+
+  .axis-row button {
+    padding:
+      6px 8px;
+
+    font-size: 12px;
+  }
+
+}
+</style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+<h1>各種座標圖</h1>
+
+
+<!-- ============================================================
+     使用說明
+============================================================ -->
+
+<div class="card">
+
+<h2>使用說明</h2>
+
+<div class="help">
+
+座標軸兩端分別代表 100 與 0；左／上是 100，右／下是 0。<br>
+
+角色、顏色、座標資料與標籤會保存在目前裝置的瀏覽器中。
+如果要把資料轉移，可以使用文字匯出與匯入。
+
+</div>
+
+</div>
+
+
+<!-- ============================================================
+     座標圖 + 角色資料
+============================================================ -->
+
+<div class="card">
+
+<h2>座標圖</h2>
+
+
+<div class="axis-selects">
+
+<div>
+
+<label>X 軸</label>
+
+<select id="xAxisSelect"></select>
+
+</div>
+
+
+<div>
+
+<label>Y 軸</label>
+
+<select id="yAxisSelect"></select>
+
+</div>
+
+</div>
+
+
+<div class="chart-area">
+
+<div class="chart-wrapper">
+
+<div
+class="axis-label axis-top"
+id="topLabel">
+</div>
+
+<div
+class="axis-label axis-bottom"
+id="bottomLabel">
+</div>
+
+<div
+class="axis-label axis-left"
+id="leftLabel">
+</div>
+
+<div
+class="axis-label axis-right"
+id="rightLabel">
+</div>
+
+
+<div
+class="chart"
+id="chart">
+</div>
+
+</div>
+
+</div>
+
+
+<h3>顯示標籤</h3>
+
+
+<div>
+
+<button
+class="tag-button selected"
+id="allTagsButton"
+onclick="clearTagFilter()">
+
+全部
+
+</button>
+
+</div>
+
+
+<div
+id="tagFilter"
+class="tag-filter">
+</div>
+
+
+<div class="filter-mode">
+
+<label>
+
+<input
+type="radio"
+name="filterMode"
+value="any"
+checked
+onchange="renderChart()">
+
+任一選中的標籤符合
+
+</label>
+
+
+<label>
+
+<input
+type="radio"
+name="filterMode"
+value="all"
+onchange="renderChart()">
+
+所有選中的標籤都符合
+
+</label>
+
+</div>
+
+
+<hr style="margin:25px 0;">
+
+
+<h2>角色資料</h2>
+
+
+<button
+class="primary"
+onclick="addCharacter()">
+
+＋新增角色
+
+</button>
+
+
+<div
+class="table-wrapper"
+style="margin-top:15px;">
+
+<table class="character-table">
+
+<thead>
+
+<tr id="characterTableHead">
+</tr>
+
+</thead>
+
+<tbody
+id="characterTableBody">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ============================================================
+     坐標軸
+============================================================ -->
+
+<div class="card">
+
+<h2>坐標軸</h2>
+
+<div id="axisList"></div>
+
+
+<button
+class="primary"
+onclick="addAxis()">
+
+＋新增坐標軸
+
+</button>
+
+</div>
+
+
+<!-- ============================================================
+     常用坐標軸
+============================================================ -->
+
+<div class="card">
+
+<h2>常用坐標軸</h2>
+
+<div id="commonAxes"></div>
+
+</div>
+
+
+<!-- ============================================================
+     匯入
+============================================================ -->
+
+<div class="card">
+
+<h2>文字匯入</h2>
+
+
+<div class="import-help">
+
+第一列是欄位名稱，第一欄是名稱，後面依序填各座標軸的 0～100 數值。<br>
+
+標籤放在最後，以 <b>#</b> 開頭。<br>
+
+欄位之間用空格分隔。<br><br>
+
+
+例如：
+
+<pre>角色 光/暗 攻/受 常識人/怪人 老/幼稚
+角色A 100 100 30 25 #孩子 #人類
+角色B 45 0 100 10 #推角 </pre>
+
+</div>
+
+
+<textarea
+id="importText"
+placeholder="把文字資料貼在這裡">
+</textarea>
+
+
+<br><br>
+
+
+<button
+class="primary"
+onclick="importData()">
+
+匯入資料
+
+</button>
+
+</div>
+
+
+<!-- ============================================================
+     匯出
+============================================================ -->
+
+<div class="card">
+
+<h2>文字匯出</h2>
+
+
+<button
+class="primary"
+onclick="generateExport()">
+
+產生匯出文字
+
+</button>
+
+
+<button
+onclick="copyExport()">
+
+複製匯出文字
+
+</button>
+
+
+<textarea
+id="exportText"
+readonly
+placeholder="按下「產生匯出文字」後會出現在這裡">
+</textarea>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   資料
+============================================================ */
+
+const STORAGE_KEY =
+"coordinate_chart_data_v3";
+
+
+const defaultColors = [
+
+"#E57373",
+"#EF9A9A",
+"#FFB74D",
+"#FFD54F",
+"#FFF176",
+"#AED581",
+"#81C784",
+"#4DB6AC",
+"#4DD0E1",
+"#64B5F6",
+"#7986CB",
+"#9575CD",
+"#BA68C8",
+"#F06292",
+"#A1887F",
+"#90A4AE",
+"#78909C",
+"#546E7A"
+
+];
+
+
+let data =
+loadData();
+
+
+let selectedTags = [];
+
+
+/* ============================================================
+   預設資料
+============================================================ */
+
+function createDefaultData() {
+
+const x = {
+
+id: makeId(),
+
+leftTop: "光",
+
+rightBottom: "暗"
+
+};
+
+
+const y = {
+
+id: makeId(),
+
+leftTop: "攻",
+
+rightBottom: "受"
+
+};
+
+
+return {
+
+axes: [
+x,
+y
+],
+
+characters: [],
+
+settings: {
+
+xAxisId: x.id,
+
+yAxisId: y.id
+
+}
+
+};
+
+}
+
+
+/* ============================================================
+   儲存
+============================================================ */
+
+function loadData() {
+
+try {
+
+const saved =
+localStorage.getItem(
+STORAGE_KEY
+);
+
+
+if (saved) {
+
+const parsed =
+JSON.parse(saved);
+
+
+if (
+parsed.axes &&
+parsed.characters &&
+parsed.settings
+) {
+
+parsed.characters.forEach(
+character => {
+
+if (
+!Array.isArray(
+character.tags
+)
+) {
+
+character.tags = [];
+
+}
+
+
+if (
+typeof character.hidden !==
+"boolean"
+) {
+
+character.hidden = false;
+
+}
+
+}
+);
+
+
+return parsed;
+
+}
+
+}
+
+}
+catch (error) {
+
+console.error(error);
+
+}
+
+
+return createDefaultData();
+
+}
+
+
+function saveData() {
+
+localStorage.setItem(
+STORAGE_KEY,
+JSON.stringify(data)
+);
+
+}
+
+
+/* ============================================================
+   ID
+============================================================ */
+
+function makeId() {
+
+return Date.now().toString(36) +
+Math.random()
+.toString(36)
+.slice(2);
+
+}
+
+
+/* ============================================================
+   軸
+============================================================ */
+
+function getAxis(id) {
+
+return data.axes.find(
+axis => axis.id === id
+);
+
+}
+
+
+function getXAxis() {
+
+return getAxis(
+data.settings.xAxisId
+);
+
+}
+
+
+function getYAxis() {
+
+return getAxis(
+data.settings.yAxisId
+);
+
+}
+
+
+/* ============================================================
+   全部重新繪製
+============================================================ */
+
+function renderAll() {
+
+renderAxisSelects();
+
+renderAxisList();
+
+renderCommonAxes();
+
+renderCharacterTable();
+
+renderTagFilter();
+
+renderChart();
+
+}
+
+
+/* ============================================================
+   軸選擇
+============================================================ */
+
+function renderAxisSelects() {
+
+const xSelect =
+document.getElementById(
+"xAxisSelect"
+);
+
+
+const ySelect =
+document.getElementById(
+"yAxisSelect"
+);
+
+
+xSelect.innerHTML = "";
+
+ySelect.innerHTML = "";
+
+
+data.axes.forEach(
+axis => {
+
+const optionX =
+document.createElement(
+"option"
+);
+
+
+optionX.value =
+axis.id;
+
+
+optionX.textContent =
+`${axis.leftTop} / ${axis.rightBottom}`;
+
+
+xSelect.appendChild(
+optionX
+);
+
+
+const optionY =
+document.createElement(
+"option"
+);
+
+
+optionY.value =
+axis.id;
+
+
+optionY.textContent =
+`${axis.leftTop} / ${axis.rightBottom}`;
+
+
+ySelect.appendChild(
+optionY
+);
+
+}
+);
+
+
+xSelect.value =
+data.settings.xAxisId;
+
+
+ySelect.value =
+data.settings.yAxisId;
+
+
+xSelect.onchange =
+function() {
+
+data.settings.xAxisId =
+this.value;
+
+saveData();
+
+renderChart();
+
+};
+
+
+ySelect.onchange =
+function() {
+
+data.settings.yAxisId =
+this.value;
+
+saveData();
+
+renderChart();
+
+};
+
+}
+
+
+/* ============================================================
+   座標圖
+============================================================ */
+
+function renderChart() {
+
+  const chart =
+    document.getElementById("chart");
+
+  chart.innerHTML = "";
+
+  const xAxis = getXAxis();
+  const yAxis = getYAxis();
+
+  if (!xAxis || !yAxis)
+    return;
+
+  document.getElementById("topLabel").textContent =
+    yAxis.leftTop;
+
+  document.getElementById("bottomLabel").textContent =
+    yAxis.rightBottom;
+
+  document.getElementById("leftLabel").textContent =
+    xAxis.leftTop;
+
+  document.getElementById("rightLabel").textContent =
+    xAxis.rightBottom;
+
+
+  const visibleCharacters =
+    getFilteredCharacters();
+
+
+  /*
+    只有「X、Y 都完全相同」才視為重疊。
+  */
+
+  const positionGroups = {};
+
+  visibleCharacters.forEach(character => {
+
+    if (character.hidden)
+      return;
+
+    const x =
+      Number(character.values[xAxis.id]);
+
+    const y =
+      Number(character.values[yAxis.id]);
+
+    if (
+      Number.isNaN(x) ||
+      Number.isNaN(y)
+    )
+      return;
+
+    const key = `${x},${y}`;
+
+    if (!positionGroups[key]) {
+      positionGroups[key] = [];
+    }
+
+    positionGroups[key].push(character);
+
+  });
+
+
+  /*
+    用 SVG 畫名字與點之間的連接線。
+    SVG 跟著整個 chart 一起縮放，
+    所以線的位置會跟著座標點正確移動。
+  */
+
+  const svg =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "svg"
+    );
+
+  svg.setAttribute(
+    "width",
+    "100%"
+  );
+
+  svg.setAttribute(
+    "height",
+    "100%"
+  );
+
+  svg.setAttribute(
+    "viewBox",
+    "0 0 100 100"
+  );
+
+  svg.style.position = "absolute";
+  svg.style.left = "0";
+  svg.style.top = "0";
+  svg.style.width = "100%";
+  svg.style.height = "100%";
+  svg.style.pointerEvents = "none";
+  svg.style.overflow = "visible";
+  svg.style.zIndex = "2";
+
+  chart.appendChild(svg);
+
+
+  visibleCharacters.forEach(character => {
+
+    if (character.hidden)
+      return;
+
+
+    const x =
+      Number(character.values[xAxis.id]);
+
+    const y =
+      Number(character.values[yAxis.id]);
+
+
+    if (
+      Number.isNaN(x) ||
+      Number.isNaN(y)
+    )
+      return;
+
+
+    /*
+      左 / 上 = 100
+      右 / 下 = 0
+    */
+
+    const left = 100 - x;
+    const top = 100 - y;
+
+
+    /*
+      先畫點
+    */
+
+    const dot =
+      document.createElement("div");
+
+    dot.className =
+      "character-dot";
+
+    dot.style.left =
+      `${left}%`;
+
+    dot.style.top =
+      `${top}%`;
+
+    dot.style.backgroundColor =
+      character.color;
+
+    dot.title =
+      character.name;
+
+    chart.appendChild(dot);
+
+
+    /*
+      找出完全相同座標的角色
+    */
+
+    const key =
+      `${x},${y}`;
+
+    const group =
+      positionGroups[key];
+
+    const index =
+      group.indexOf(character);
+
+
+    /*
+      一般情況：
+      名字就在自己的點下面。
+    */
+
+    let offsetX = 0;
+    let offsetY = 10;
+
+
+    /*
+      只有完全重疊才移開。
+    */
+
+    if (group.length > 1) {
+
+      const offsets = [
+
+        [-28, 10],
+        [ 28, 10],
+
+        [-28, 28],
+        [ 28, 28],
+
+        [-56, 10],
+        [ 56, 10],
+
+        [-56, 28],
+        [ 56, 28],
+
+        [-84, 10],
+        [ 84, 10],
+
+        [-84, 28],
+        [ 84, 28]
+
+      ];
+
+
+      const offset =
+        offsets[
+          index % offsets.length
+        ];
+
+
+      offsetX =
+        offset[0];
+
+      offsetY =
+        offset[1];
+
+
+      /*
+        因為名字被移開，
+        畫一條線連回原本的座標點。
+
+        SVG viewBox 是 0～100，
+        所以直接使用百分比座標。
+      */
+
+      const line =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "line"
+        );
+
+
+      /*
+        線的終點是角色座標點
+      */
+
+      line.setAttribute(
+        "x1",
+        left
+      );
+
+      line.setAttribute(
+        "y1",
+        top
+      );
+
+
+      /*
+        線的另一端是移開後的名字位置
+      */
+
+      /*
+        這裡把 px 偏移換算成大約的 viewBox 位移。
+        讓線能跟著圖表縮放。
+      */
+
+      const rect =
+        chart.getBoundingClientRect();
+
+      const pxToPercent =
+        100 / rect.width;
+
+
+      const labelX =
+        left +
+        offsetX * pxToPercent;
+
+      const labelY =
+        top +
+        offsetY * pxToPercent;
+
+
+      line.setAttribute(
+        "x2",
+        labelX
+      );
+
+      line.setAttribute(
+        "y2",
+        labelY
+      );
+
+
+      line.setAttribute(
+        "stroke",
+        character.color
+      );
+
+      line.setAttribute(
+        "stroke-width",
+        "0.35"
+      );
+
+      line.setAttribute(
+        "stroke-opacity",
+        "0.7"
+      );
+
+
+      svg.appendChild(line);
+
+    }
+
+
+    /*
+      名字
+    */
+
+    const label =
+      document.createElement("div");
+
+    label.className =
+      "character-name";
+
+    label.textContent =
+      character.name;
+
+
+    label.style.left =
+      `calc(${left}% + ${offsetX}px)`;
+
+    label.style.top =
+      `calc(${top}% + ${offsetY}px)`;
+
+
+    /*
+      被移開的名字放在線上方，
+      避免線穿過文字。
+    */
+
+    if (group.length > 1) {
+
+      label.style.zIndex = "5";
+
+    }
+
+
+    chart.appendChild(label);
+
+  });
+
+}
+
+
+/* ============================================================
+   篩選
+============================================================ */
+
+function getFilteredCharacters() {
+
+if (
+selectedTags.length === 0
+) {
+
+return data.characters;
+
+}
+
+
+const mode =
+document.querySelector(
+'input[name="filterMode"]:checked'
+)?.value || "any";
+
+
+return data.characters.filter(
+character => {
+
+const tags =
+character.tags || [];
+
+
+if (mode === "all") {
+
+return selectedTags.every(
+tag =>
+tags.includes(tag)
+);
+
+}
+
+
+return selectedTags.some(
+tag =>
+tags.includes(tag)
+);
+
+}
+);
+
+}
+
+
+/* ============================================================
+   標籤
+============================================================ */
+
+function getAllTags() {
+
+const set =
+new Set();
+
+
+data.characters.forEach(
+character => {
+
+(
+character.tags || []
+).forEach(
+tag =>
+set.add(tag)
+);
+
+}
+);
+
+
+return Array.from(
+set
+).sort();
+
+}
+
+
+function renderTagFilter() {
+
+const container =
+document.getElementById(
+"tagFilter"
+);
+
+
+container.innerHTML = "";
+
+
+const tags =
+getAllTags();
+
+
+tags.forEach(
+tag => {
+
+const button =
+document.createElement(
+"button"
+);
+
+
+button.className =
+"tag-button";
+
+
+if (
+selectedTags.includes(tag)
+) {
+
+button.classList.add(
+"selected"
+);
+
+}
+
+
+button.textContent =
+`#${tag}`;
+
+
+button.onclick =
+function() {
+
+if (
+selectedTags.includes(tag)
+) {
+
+selectedTags =
+selectedTags.filter(
+item =>
+item !== tag
+);
+
+}
+else {
+
+selectedTags.push(tag);
+
+}
+
+
+renderTagFilter();
+
+renderChart();
+
+};
+
+
+container.appendChild(
+button
+);
+
+}
+);
+
+
+document
+.getElementById(
+"allTagsButton"
+)
+.classList.toggle(
+"selected",
+selectedTags.length === 0
+);
+
+}
+
+
+function clearTagFilter() {
+
+selectedTags = [];
+
+renderTagFilter();
+
+renderChart();
+
+}
+
+
+/* ============================================================
+   新增角色
+============================================================ */
+
+function addCharacter() {
+
+const name =
+prompt(
+"請輸入角色名稱"
+);
+
+
+if (!name)
+return;
+
+
+const values = {};
+
+
+data.axes.forEach(
+axis => {
+
+values[axis.id] =
+null;
+
+}
+);
+
+
+data.characters.push({
+
+id: makeId(),
+
+name:
+name.trim(),
+
+color:
+defaultColors[
+data.characters.length %
+defaultColors.length
+],
+
+values,
+
+tags: [],
+
+hidden: false
+
+});
+
+
+saveData();
+
+renderAll();
+
+}
+
+
+/* ============================================================
+   角色表格
+============================================================ */
+
+function renderCharacterTable() {
+
+const head =
+document.getElementById(
+"characterTableHead"
+);
+
+
+const body =
+document.getElementById(
+"characterTableBody"
+);
+
+
+head.innerHTML = "";
+
+body.innerHTML = "";
+
+
+const controlTh =
+document.createElement(
+"th"
+);
+
+
+controlTh.textContent =
+"顯示";
+
+
+head.appendChild(
+controlTh
+);
+
+
+const colorTh =
+document.createElement(
+"th"
+);
+
+
+colorTh.textContent =
+"顏色";
+
+
+head.appendChild(
+colorTh
+);
+
+
+const nameTh =
+document.createElement(
+"th"
+);
+
+
+nameTh.textContent =
+"名稱";
+
+
+head.appendChild(
+nameTh
+);
+
+
+data.axes.forEach(
+axis => {
+
+const th =
+document.createElement(
+"th"
+);
+
+
+th.textContent =
+`${axis.leftTop}/${axis.rightBottom}`;
+
+
+head.appendChild(
+th
+);
+
+}
+);
+
+
+const tagsTh =
+document.createElement(
+"th"
+);
+
+
+tagsTh.textContent =
+"標籤";
+
+
+head.appendChild(
+tagsTh
+);
+
+
+data.characters.forEach(
+character => {
+
+const tr =
+document.createElement(
+"tr"
+);
+
+
+if (character.hidden) {
+
+tr.classList.add(
+"hidden-row"
+);
+
+}
+
+
+/* 顯示 */
+
+const controlTd =
+document.createElement(
+"td"
+);
+
+
+const hideButton =
+document.createElement(
+"button"
+);
+
+
+hideButton.className =
+"small-btn";
+
+
+hideButton.textContent =
+character.hidden
+? "○"
+: "●";
+
+
+hideButton.title =
+character.hidden
+? "顯示"
+: "隱藏";
+
+
+hideButton.onclick =
+function() {
+
+character.hidden =
+!character.hidden;
+
+
+saveData();
+
+renderCharacterTable();
+
+renderChart();
+
+};
+
+
+controlTd.appendChild(
+hideButton
+);
+
+
+const deleteButton =
+document.createElement(
+"button"
+);
+
+
+deleteButton.className =
+"small-btn danger";
+
+
+deleteButton.textContent =
+"×";
+
+
+deleteButton.style.marginLeft =
+"4px";
+
+
+deleteButton.onclick =
+function() {
+
+data.characters =
+data.characters.filter(
+item =>
+item.id !==
+character.id
+);
+
+
+saveData();
+
+renderAll();
+
+};
+
+
+controlTd.appendChild(
+deleteButton
+);
+
+
+tr.appendChild(
+controlTd
+);
+
+
+/* ============================================================
+   顏色
+============================================================ */
+
+const colorTd =
+document.createElement(
+"td"
+);
+
+
+colorTd.className =
+"color-cell";
+
+
+const colorButton =
+document.createElement(
+"button"
+);
+
+
+colorButton.className =
+"color-button";
+
+
+colorButton.style.backgroundColor =
+character.color;
+
+
+colorTd.appendChild(
+colorButton
+);
+
+
+const colorPicker =
+document.createElement(
+"div"
+);
+
+
+colorPicker.className =
+"color-picker";
+
+
+/*
+  開啟時動態計算位置，
+  避免左右被切掉。
+*/
+
+function positionColorPicker() {
+
+const rect =
+colorButton.getBoundingClientRect();
+
+
+const pickerWidth =
+216;
+
+
+const pickerHeight =
+190;
+
+
+let left =
+rect.left;
+
+
+let top =
+rect.bottom + 6;
+
+
+/*
+  如果右邊超出畫面，
+  就往左移。
+*/
+
+if (
+left + pickerWidth >
+window.innerWidth - 8
+) {
+
+left =
+window.innerWidth -
+pickerWidth -
+8;
+
+}
+
+
+/*
+  如果左邊超出畫面，
+  就往右移。
+*/
+
+if (left < 8) {
+
+left = 8;
+
+}
+
+
+/*
+  如果下面放不下，
+  就放到按鈕上面。
+*/
+
+if (
+top + pickerHeight >
+window.innerHeight - 8
+) {
+
+top =
+rect.top -
+pickerHeight -
+6;
+
+}
+
+
+/*
+  最後再限制一次。
+*/
+
+if (top < 8) {
+
+top = 8;
+
+}
+
+
+colorPicker.style.left =
+`${left}px`;
+
+
+colorPicker.style.top =
+`${top}px`;
+
+}
+
+
+/*
+  預設顏色
+*/
+
+defaultColors.forEach(
+color => {
+
+const option =
+document.createElement(
+"button"
+);
+
+
+option.className =
+"color-option";
+
+
+option.style.backgroundColor =
+color;
+
+
+option.title =
+color;
+
+
+option.onclick =
+function(event) {
+
+event.stopPropagation();
+
+
+character.color =
+color;
+
+
+saveData();
+
+
+colorButton.style.backgroundColor =
+color;
+
+
+colorPicker.classList.remove(
+"open"
+);
+
+
+renderChart();
+
+};
+
+
+colorPicker.appendChild(
+option
+);
+
+}
+);
+
+
+/*
+  自訂顏色
+*/
+
+const customLabel =
+document.createElement(
+"label"
+);
+
+
+customLabel.className =
+"custom-color-label";
+
+
+customLabel.textContent =
+"自訂顏色";
+
+
+const customInput =
+document.createElement(
+"input"
+);
+
+
+customInput.type =
+"color";
+
+
+customInput.className =
+"custom-color-input";
+
+
+customInput.value =
+character.color;
+
+
+customInput.oninput =
+function(event) {
+
+event.stopPropagation();
+
+
+character.color =
+this.value;
+
+
+colorButton.style.backgroundColor =
+this.value;
+
+
+saveData();
+
+renderChart();
+
+};
+
+
+customInput.onclick =
+function(event) {
+
+event.stopPropagation();
+
+};
+
+
+customLabel.appendChild(
+customInput
+);
+
+
+colorPicker.appendChild(
+customLabel
+);
+
+
+document.body.appendChild(
+colorPicker
+);
+
+
+colorButton.onclick =
+function(event) {
+
+event.stopPropagation();
+
+
+document
+.querySelectorAll(
+".color-picker.open"
+)
+.forEach(
+picker => {
+
+picker.classList.remove(
+"open"
+);
+
+}
+);
+
+
+if (
+colorPicker.classList.contains(
+"open"
+)
+) {
+
+colorPicker.classList.remove(
+"open"
+);
+
+}
+else {
+
+positionColorPicker();
+
+colorPicker.classList.add(
+"open"
+);
+
+}
+
+};
+
+
+tr.appendChild(
+colorTd
+);
+
+
+/* ============================================================
+   名稱
+============================================================ */
+
+const nameTd =
+document.createElement(
+"td"
+);
+
+
+const nameInput =
+document.createElement(
+"input"
+);
+
+
+nameInput.type =
+"text";
+
+
+nameInput.className =
+"name-input";
+
+
+nameInput.value =
+character.name;
+
+
+nameInput.onchange =
+function() {
+
+character.name =
+this.value.trim();
+
+
+saveData();
+
+renderChart();
+
+};
+
+
+nameTd.appendChild(
+nameInput
+);
+
+
+tr.appendChild(
+nameTd
+);
+
+
+/* ============================================================
+   座標
+============================================================ */
+
+data.axes.forEach(
+axis => {
+
+const td =
+document.createElement(
+"td"
+);
+
+
+const input =
+document.createElement(
+"input"
+);
+
+
+input.type =
+"number";
+
+
+input.min =
+"0";
+
+
+input.max =
+"100";
+
+
+input.step =
+"1";
+
+
+const value =
+character.values[
+axis.id
+];
+
+
+input.value =
+value === null ||
+value === undefined
+? ""
+: value;
+
+
+input.onchange =
+function() {
+
+if (
+this.value === ""
+) {
+
+character.values[
+axis.id
+] = null;
+
+}
+else {
+
+let number =
+Number(
+this.value
+);
+
+
+if (
+Number.isNaN(number)
+)
+return;
+
+
+number =
+Math.max(
+0,
+Math.min(
+100,
+number
+)
+);
+
+
+character.values[
+axis.id
+] =
+number;
+
+
+this.value =
+number;
+
+}
+
+
+saveData();
+
+renderChart();
+
+};
+
+
+td.appendChild(
+input
+);
+
+
+tr.appendChild(
+td
+);
+
+}
+);
+
+
+/* ============================================================
+   標籤
+============================================================ */
+
+const tagsTd =
+document.createElement(
+"td"
+);
+
+
+const tagsInput =
+document.createElement(
+"input"
+);
+
+
+tagsInput.type =
+"text";
+
+
+tagsInput.className =
+"tags-input";
+
+
+tagsInput.placeholder =
+"#勇者 #人類";
+
+
+tagsInput.value =
+(
+character.tags || []
+)
+.map(
+tag =>
+`#${tag}`
+)
+.join(" ");
+
+
+tagsInput.onchange =
+function() {
+
+const matches =
+this.value.match(
+/#[^\s#]+/g
+) || [];
+
+
+character.tags =
+matches.map(
+tag =>
+tag.slice(1)
+);
+
+
+saveData();
+
+renderTagFilter();
+
+renderChart();
+
+};
+
+
+tagsTd.appendChild(
+tagsInput
+);
+
+
+tr.appendChild(
+tagsTd
+);
+
+
+body.appendChild(
+tr
+);
+
+}
+);
+
+}
+
+
+/* ============================================================
+   坐標軸列表
+============================================================ */
+
+function renderAxisList() {
+
+const container =
+document.getElementById(
+"axisList"
+);
+
+
+container.innerHTML = "";
+
+
+data.axes.forEach(
+axis => {
+
+const row =
+document.createElement(
+"div"
+);
+
+
+row.className =
+"axis-row";
+
+
+const info =
+document.createElement(
+"div"
+);
+
+
+info.className =
+"axis-info";
+
+
+const name =
+document.createElement(
+"div"
+);
+
+
+name.className =
+"axis-name";
+
+
+name.textContent =
+`${axis.leftTop} / ${axis.rightBottom}`;
+
+
+info.appendChild(
+name
+);
+
+
+const description =
+document.createElement(
+"div"
+);
+
+
+description.className =
+"axis-description";
+
+
+description.textContent =
+`${axis.leftTop} = 100　${axis.rightBottom} = 0`;
+
+
+info.appendChild(
+description
+);
+
+
+row.appendChild(
+info
+);
+
+
+/* 編輯 */
+
+const editButton =
+document.createElement(
+"button"
+);
+
+
+editButton.textContent =
+"編輯";
+
+
+editButton.onclick =
+function() {
+
+const left =
+prompt(
+"100 的一端名稱",
+axis.leftTop
+);
+
+
+if (
+left === null
+)
+return;
+
+
+const right =
+prompt(
+"0 的一端名稱",
+axis.rightBottom
+);
+
+
+if (
+right === null
+)
+return;
+
+
+if (
+!left.trim() ||
+!right.trim()
+)
+return;
+
+
+axis.leftTop =
+left.trim();
+
+
+axis.rightBottom =
+right.trim();
+
+
+saveData();
+
+renderAll();
+
+};
+
+
+row.appendChild(
+editButton
+);
+
+
+/* ============================================================
+   反轉
+============================================================ */
+
+const reverseButton =
+document.createElement(
+"button"
+);
+
+
+reverseButton.className =
+"reverse-btn";
+
+
+reverseButton.textContent =
+"反轉";
+
+
+reverseButton.title =
+"交換兩端名稱，並反轉所有角色在此軸上的數值";
+
+
+reverseButton.onclick =
+function() {
+
+const oldLeft =
+axis.leftTop;
+
+
+axis.leftTop =
+axis.rightBottom;
+
+
+axis.rightBottom =
+oldLeft;
+
+
+data.characters.forEach(
+character => {
+
+const value =
+character.values[
+axis.id
+];
+
+
+if (
+value !== null &&
+value !== undefined &&
+!Number.isNaN(
+Number(value)
+)
+) {
+
+character.values[
+axis.id
+] =
+100 -
+Number(value);
+
+}
+
+}
+);
+
+
+saveData();
+
+renderAll();
+
+};
+
+
+row.appendChild(
+reverseButton
+);
+
+
+/* 刪除 */
+
+const deleteButton =
+document.createElement(
+"button"
+);
+
+
+deleteButton.className =
+"danger";
+
+
+deleteButton.textContent =
+"刪除";
+
+
+deleteButton.onclick =
+function() {
+
+if (
+data.axes.length <= 2
+) {
+
+alert(
+"至少需要保留兩個坐標軸。"
+);
+
+return;
+
+}
+
+
+data.axes =
+data.axes.filter(
+item =>
+item.id !== axis.id
+);
+
+
+if (
+data.settings.xAxisId ===
+axis.id
+) {
+
+data.settings.xAxisId =
+data.axes[0].id;
+
+}
+
+
+if (
+data.settings.yAxisId ===
+axis.id
+) {
+
+data.settings.yAxisId =
+data.axes[1]?.id ||
+data.axes[0].id;
+
+}
+
+
+data.characters.forEach(
+character => {
+
+delete character.values[
+axis.id
+];
+
+}
+);
+
+
+saveData();
+
+renderAll();
+
+};
+
+
+row.appendChild(
+deleteButton
+);
+
+
+container.appendChild(
+row
+);
+
+}
+);
+
+}
+
+
+/* ============================================================
+   新增坐標軸
+============================================================ */
+
+function addAxis() {
+
+const left =
+prompt(
+"請輸入 100 的一端名稱"
+);
+
+
+if (!left)
+return;
+
+
+const right =
+prompt(
+"請輸入 0 的一端名稱"
+);
+
+
+if (!right)
+return;
+
+
+const axis = {
+
+id: makeId(),
+
+leftTop:
+left.trim(),
+
+rightBottom:
+right.trim()
+
+};
+
+
+data.axes.push(
+axis
+);
+
+
+data.characters.forEach(
+character => {
+
+character.values[
+axis.id
+] = null;
+
+}
+);
+
+
+saveData();
+
+renderAll();
+
+}
+
+
+/* ============================================================
+   常用坐標軸
+============================================================ */
+
+const commonAxes = [
+
+["理性", "感性"],
+["外向", "內向"],
+["秩序", "混沌"],
+["有錢", "沒錢"],
+["可愛", "性感"],
+["天才", "努力家"],
+["主動", "被動"],
+["直覺", "思考"],
+["怪人", "常識人"],
+["夢想家", "務實"],
+["幼稚", "成熟"],
+["樂觀", "悲觀"],
+["溫柔", "冷淡"],
+["正義", "邪惡"],
+["自由", "服從"],
+["理智", "衝動"]
+
+];
+
+
+function renderCommonAxes() {
+
+const container =
+document.getElementById(
+"commonAxes"
+);
+
+
+container.innerHTML = "";
+
+
+commonAxes.forEach(
+pair => {
+
+const button =
+document.createElement(
+"button"
+);
+
+
+button.textContent =
+`${pair[0]} / ${pair[1]}`;
+
+
+button.style.margin =
+"4px";
+
+
+button.onclick =
+function() {
+
+const exists =
+data.axes.some(
+axis =>
+axis.leftTop ===
+pair[0] &&
+axis.rightBottom ===
+pair[1]
+);
+
+
+if (exists)
+return;
+
+
+const axis = {
+
+id: makeId(),
+
+leftTop:
+pair[0],
+
+rightBottom:
+pair[1]
+
+};
+
+
+data.axes.push(
+axis
+);
+
+
+data.characters.forEach(
+character => {
+
+character.values[
+axis.id
+] = null;
+
+}
+);
+
+
+saveData();
+
+renderAll();
+
+};
+
+
+container.appendChild(
+button
+);
+
+}
+);
+
+}
+
+
+/* ============================================================
+   匯入
+============================================================ */
+
+function importData() {
+
+const text =
+document.getElementById(
+"importText"
+).value.trim();
+
+
+if (!text)
+return;
+
+
+const lines =
+text
+.split(/\r?\n/)
+.map(
+line =>
+line.trim()
+)
+.filter(
+line =>
+line
+);
+
+
+if (
+lines.length < 2
+) {
+
+alert(
+"資料格式不完整。"
+);
+
+return;
+
+}
+
+
+const headers =
+lines[0]
+.split(/\s+/);
+
+
+if (
+headers[0] !== "角色"
+) {
+
+alert(
+"第一欄必須是「角色」。"
+);
+
+return;
+
+}
+
+
+const importedAxes = [];
+
+
+headers
+.slice(1)
+.forEach(
+header => {
+
+if (
+header === "標籤" ||
+header.startsWith("#")
+)
+return;
+
+
+const parts =
+header.split("/");
+
+
+if (
+parts.length !== 2
+)
+return;
+
+
+const left =
+parts[0];
+
+
+const right =
+parts[1];
+
+
+let axis =
+data.axes.find(
+item =>
+item.leftTop ===
+left &&
+item.rightBottom ===
+right
+);
+
+
+if (!axis) {
+
+axis = {
+
+id: makeId(),
+
+leftTop:
+left,
+
+rightBottom:
+right
+
+};
+
+
+data.axes.push(
+axis
+);
+
+
+data.characters.forEach(
+character => {
+
+character.values[
+axis.id
+] = null;
+
+}
+);
+
+}
+
+
+importedAxes.push({
+
+header,
+
+axis
+
+});
+
+}
+);
+
+
+lines
+.slice(1)
+.forEach(
+line => {
+
+const tagMatches =
+line.match(
+/#[^\s#]+/g
+) || [];
+
+
+const cleanLine =
+line
+.replace(
+/#[^\s#]+/g,
+""
+)
+.trim();
+
+
+const parts =
+cleanLine.split(/\s+/);
+
+
+const name =
+parts.shift();
+
+
+if (!name)
+return;
+
+
+const character = {
+
+id: makeId(),
+
+name,
+
+color:
+defaultColors[
+data.characters.length %
+defaultColors.length
+],
+
+values: {},
+
+tags:
+tagMatches.map(
+tag =>
+tag.slice(1)
+),
+
+hidden: false
+
+};
+
+
+data.axes.forEach(
+axis => {
+
+character.values[
+axis.id
+] = null;
+
+}
+);
+
+
+importedAxes.forEach(
+(item, index) => {
+
+const raw =
+parts[index];
+
+
+if (
+raw === undefined ||
+raw === ""
+)
+return;
+
+
+const number =
+Number(raw);
+
+
+if (
+Number.isNaN(number)
+)
+return;
+
+
+character.values[
+item.axis.id
+] =
+Math.max(
+0,
+Math.min(
+100,
+number
+)
+);
+
+}
+);
+
+
+data.characters.push(
+character
+);
+
+}
+);
+
+
+saveData();
+
+renderAll();
+
+
+document.getElementById(
+"importText"
+).value = "";
+
+}
+
+
+/* ============================================================
+   匯出
+============================================================ */
+
+function generateExport() {
+
+const headers = [
+
+"角色",
+
+...data.axes.map(
+axis =>
+`${axis.leftTop}/${axis.rightBottom}`
+),
+
+"標籤"
+
+];
+
+
+const lines = [
+
+headers.join(" ")
+
+];
+
+
+data.characters.forEach(
+character => {
+
+const values =
+data.axes.map(
+axis => {
+
+const value =
+character.values[
+axis.id
+];
+
+
+return (
+value === null ||
+value === undefined
+)
+? ""
+: value;
+
+}
+);
+
+
+const tags =
+(
+character.tags || []
+)
+.map(
+tag =>
+`#${tag}`
+);
+
+
+lines.push(
+
+[
+character.name,
+...values,
+...tags
+].join(" ")
+
+);
+
+}
+);
+
+
+document.getElementById(
+"exportText"
+).value =
+lines.join("\n");
+
+}
+
+
+/* ============================================================
+   複製
+============================================================ */
+
+function copyExport() {
+
+const textarea =
+document.getElementById(
+"exportText"
+);
+
+
+if (!textarea.value) {
+
+generateExport();
+
+}
+
+
+textarea.select();
+
+
+navigator.clipboard
+.writeText(
+textarea.value
+)
+.catch(
+() => {
+
+document.execCommand(
+"copy"
+);
+
+}
+);
+
+}
+
+
+/* ============================================================
+   關閉顏色選單
+============================================================ */
+
+document.addEventListener(
+"click",
+function() {
+
+document
+.querySelectorAll(
+".color-picker.open"
+)
+.forEach(
+picker => {
+
+picker.classList.remove(
+"open"
+);
+
+}
+);
+
+}
+);
+
+
+/*
+  捲動或視窗大小改變時，
+  如果顏色選單開著就重新定位。
+*/
+
+window.addEventListener(
+"scroll",
+function() {
+
+document
+.querySelectorAll(
+".color-picker.open"
+)
+.forEach(
+picker => {
+
+const button =
+picker._colorButton;
+
+
+if (button) {
+
+const rect =
+button.getBoundingClientRect();
+
+
+picker.style.left =
+`${Math.max(
+8,
+Math.min(
+rect.left,
+window.innerWidth -
+picker.offsetWidth -
+8
+)
+)}px`;
+
+}
+
+}
+);
+
+},
+true
+);
+
+
+/* ============================================================
+   初始
+============================================================ */
+
+renderAll();
+
+</script>
+
+</body>
+</html>
