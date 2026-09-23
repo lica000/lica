@@ -8,7 +8,7 @@
 
   <style>
     :root {
-      /* 全站基礎色票：頁面背景、文字、卡片、主按鈕、表格等 */ 
+      /* 全站基礎色票：頁面背景、文字、卡片、主按鈕、表格等 */
       --bg: #f4eee7;
       --bg-strong: #e9dfd4;
       --surface: #fffdf9;
@@ -693,6 +693,14 @@
       background: transparent;
       color: var(--text);
       font: inherit;
+      appearance: none;
+      -moz-appearance: textfield;
+    }
+
+    .value-editor input[type="number"]::-webkit-outer-spin-button,
+    .value-editor input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     .value-editor input[type="range"] {
@@ -2502,23 +2510,30 @@
 
           const openSlider = () => {
             valueEditor.style.display = "flex";
+            valueDisplay.style.display = "none";
             valueDisplay.style.opacity = "0.7";
-            rangeInput.focus();
+            numberInput.focus();
+            numberInput.select();
           };
 
           const closeSlider = () => {
             valueEditor.style.display = "none";
+            valueDisplay.style.display = "block";
             valueDisplay.style.opacity = "1";
           };
 
           td.addEventListener("click", function (event) {
-            if (event.target === rangeInput) return;
-            if (valueEditor.style.display === "flex") {
-              closeSlider();
-              return;
-            }
+            if (event.target === numberInput || event.target === rangeInput || valueEditor.contains(event.target)) return;
+            if (valueEditor.style.display === "flex") return;
             openSlider();
           });
+
+          document.addEventListener("click", function (event) {
+            if (valueEditor.style.display !== "flex") return;
+            if (event.target === numberInput || event.target === rangeInput || valueEditor.contains(event.target)) return;
+            if (td.contains(event.target)) return;
+            closeSlider();
+          }, true);
 
           valueEditor.appendChild(numberInput);
           valueEditor.appendChild(rangeInput);
